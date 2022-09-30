@@ -1,0 +1,23 @@
+{
+  "name": "power-usage",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon --trace-warnings index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "awilix": "^7.0.3",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.1",
+    "http-errors": "^2.0.0",
+    "nodemon": "^2.0.20",
+    "pg": "^8.8.0",
+    "pg-hstore": "^2.3.4",
+    "sequelize": "^6.23.2"
+  },
+  "keywords": [],
+  "author": "akshay",
+  "license": "ISC"
+}

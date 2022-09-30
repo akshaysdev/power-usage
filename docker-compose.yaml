@@ -1,0 +1,43 @@
+version: '3.7'
+
+services:
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    networks:
+      - power-usage-net
+    ports:
+      - 8000:8000
+    environment:
+      - TZ=Asia/Kolkata
+    container_name: server
+    working_dir: /home/apps/power-usage/
+    volumes:
+      - ~/Developer/Projects/Node/power-usage:/home/apps/power-usage
+      - node_modules:/home/apps/power-usage/node_modules
+    depends_on:
+      postgres_db:
+        condition: service_healthy
+    command: npm start
+
+  postgres_db:
+    image: postgres
+    networks:
+      - power-usage-net
+    container_name: postgres_db
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_PASSWORD=admin
+    volumes:
+      - ~/Developer/dbs/postgres:/var/lib/postgresql/data
+    command: --quiet --logpath /dev/null
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongo localhost:5432/healthcheck-database --quiet
+
+networks:
+  power-usage-net:
+
+volumes:
+  node_modules:
