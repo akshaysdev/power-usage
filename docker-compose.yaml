@@ -18,7 +18,7 @@ services:
       - node_modules:/home/apps/power-usage/node_modules
     depends_on:
       postgres_db:
-        condition: service_healthy
+        condition: service_started
     command: npm start
 
   postgres_db:
@@ -32,9 +32,6 @@ services:
       - POSTGRES_PASSWORD=admin
     volumes:
       - ~/Developer/dbs/postgres:/var/lib/postgresql/data
-    command: --quiet --logpath /dev/null
-    healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongo localhost:5432/healthcheck-database --quiet
 
 networks:
   power-usage-net:

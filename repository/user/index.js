@@ -34,7 +34,6 @@ module.exports = class UserRepository {
           email,
         },
       }))[0]?.dataValues;
-      console.log(`🚀 ~ file: index.js ~ line 37 ~ UserRepository ~ findByEmail ~ user`, user)
 
       return user;
     } catch (error) {
@@ -45,11 +44,11 @@ module.exports = class UserRepository {
 
   async findByMobile(mobile) {
     try {
-      const user = await this.repository.findAll({
+      const user = (await this.repository.findAll({
         where: {
           mobile,
         },
-      });
+      }))[0]?.dataValues;
 
       return user;
     } catch (error) {
@@ -60,11 +59,11 @@ module.exports = class UserRepository {
 
   async findByUserName(userName) {
     try {
-      const user = await this.repository.findAll({
+      const user = (await this.repository.findAll({
         where: {
           userName,
         },
-      });
+      }))[0]?.dataValues;
 
       return user;
     } catch (error) {

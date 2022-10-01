@@ -5,8 +5,7 @@ const UserModel = async (sequelize) => {
     'User',
     {
       id: {
-        type: DataTypes.INTEGER,
-        autoIncrement: true,
+        type: DataTypes.STRING,
         primaryKey: true,
       },
       name: {
@@ -34,8 +33,7 @@ const UserModel = async (sequelize) => {
       },
     },
     {
-      createdAt: true,
-      updatedAt: true,
+      timestamps: true,
       freezeTableName: true,
     }
   );
