@@ -8,7 +8,8 @@ userRouter.post('/register', user.register);
 
 userRouter.post('/login', user.login);
 
-// TODO: to be removed
-userRouter.get('/all', verifyToken, user.getAllUsers);
+userRouter.get('/logout', verifyToken, user.logout);
+
+userRouter.get('/sessions', verifyToken, user.fetchAllSessions);
 
 module.exports = { userRouter };

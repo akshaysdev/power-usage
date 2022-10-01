@@ -17,9 +17,13 @@ const verifyToken = async (req, res, next) => {
 
     const currentTimeStamp = new Date().getTime() + 1;
     const timeStamp = new Date(decode?.user?.timeStamp).getTime();
-
-    if ((currentTimeStamp - timeStamp) / 1000 > tokenExpiration) {
-      await sessionService.remove(decode.user.userId, token);
+    try {
+      if ((currentTimeStamp - timeStamp) / 1000 > tokenExpiration) {
+        const userAgent = req.headers['user-agent'] + req.socket.remoteAddress;
+        await sessionService.remove(decode.user.userId, userAgent);
+      }
+    } catch (error) {
+      next(error);
     }
     next(error);
   }

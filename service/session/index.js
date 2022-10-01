@@ -33,13 +33,34 @@ module.exports = class SessionService {
     }
   }
 
-  async remove(userId, accessToken) {
+  async remove(userId, userAgent) {
     try {
-      await this.sessionRepository.deleteSessionByUserIdAndToken(userId, accessToken);
+      await this.sessionRepository.deleteSessionByUserIdAndAgent(userId, userAgent);
 
       return true;
     } catch (error) {
-      error.meta = { ...error.meta, 'SessionService.createSession': { userId, accessToken } };
+      error.meta = { ...error.meta, 'SessionService.remove': { userId, userAgent } };
+      throw error;
+    }
+  }
+
+  async removeExpiredSessions() {
+    try {
+      const sessions = await this.sessionRepository.deleteExpiredSessions();
+
+      return sessions;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async findAllSessionsByUserId(userId) {
+    try {
+      const sessions = await this.sessionRepository.findAllSessionsByUserId(userId);
+
+      return sessions;
+    } catch (error) {
+      error.meta = { ...error.meta, 'SessionService.findAllSessionsByUserId': { userId } };
       throw error;
     }
   }

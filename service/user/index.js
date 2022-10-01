@@ -39,17 +39,17 @@ module.exports = class UserService {
 
       const existingEmail = await this.userRepository.findByEmail(email);
       if (existingEmail) {
-        throw createError(401, 'User already exists');
+        throw createError(400, 'User already exists');
       }
 
       const existingMobile = await this.userRepository.findByMobile(mobile);
       if (existingMobile) {
-        throw createError(401, 'Mobile number already exists');
+        throw createError(400, 'Mobile number already exists');
       }
 
       const existingUserName = await this.userRepository.findByUserName(userName);
       if (existingUserName) {
-        throw createError(401, 'UserName already exists');
+        throw createError(400, 'UserName already exists');
       }
 
       return true;
@@ -83,7 +83,14 @@ module.exports = class UserService {
 
   async login(credentials, userAgent) {
     try {
-      const user = await this.userRepository.findByEmail(credentials.email);
+      let user;
+      if (credentials.email) {
+        user = await this.userRepository.findByEmail(credentials.email);
+      } else if (credentials.mobile) {
+        user = await this.userRepository.findByMobile(credentials.mobile);
+      } else if (credentials.userName) {
+        user = await this.userRepository.findByUserName(credentials.userName);
+      }
       if (!user) {
         throw createError(422, 'Invalid email or password!');
       }
@@ -116,13 +123,13 @@ module.exports = class UserService {
     }
   }
 
-  // TODO: to be removed
-  async findAllUsers() {
+  async logout(userId, userAgent) {
     try {
-      const users = await this.userRepository.findAll();
+      await this.sessionService.remove(userId, userAgent);
 
-      return users;
+      return { message: 'Logged-Out Successfully!' };
     } catch (error) {
+      error.meta = { ...error.meta, 'UserService.logout': { userId, userAgent } };
       throw error;
     }
   }

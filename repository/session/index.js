@@ -1,3 +1,5 @@
+const { Op } = require('sequelize');
+const { tokenExpiration } = require('../../constants');
 const { SessionModel } = require('./model');
 
 module.exports = class SessionRepository {
@@ -20,6 +22,7 @@ module.exports = class SessionRepository {
   async findByUserId(userId) {
     try {
       const sessions = await this.repository.findAll({
+        raw: true,
         where: {
           userId,
         },
@@ -36,12 +39,13 @@ module.exports = class SessionRepository {
     try {
       const session = (
         await this.repository.findAll({
+          raw: true,
           where: {
             userId,
             userAgent,
           },
         })
-      )[0]?.dataValues;
+      )[0];
 
       return session;
     } catch (error) {
@@ -53,18 +57,51 @@ module.exports = class SessionRepository {
     }
   }
 
-  async deleteSessionByUserIdAndToken(userId, token) {
+  async deleteSessionByUserIdAndAgent(userId, userAgent) {
     try {
       const session = await this.repository.destroy({
         where: {
           userId,
-          accessToken: token,
+          userAgent,
         },
       });
 
       return session;
     } catch (error) {
-      error.meta = { ...error.meta, 'SessionRepository.deleteSessionByUserIdAndToken': { userId, token } };
+      error.meta = { ...error.meta, 'SessionRepository.deleteSessionByUserIdAndAgent': { userId, userAgent } };
+      throw error;
+    }
+  }
+
+  async findAllSessionsByUserId(userId) {
+    try {
+      const session = await this.repository.findAll({
+        raw: true,
+        where: {
+          userId,
+        },
+        attributes: ['userId', 'userAgent', ['createdAt', 'loggedInTime']],
+      });
+
+      return session;
+    } catch (error) {
+      error.meta = { ...error.meta, 'SessionRepository.findAllSessionsByUserId': { userId } };
+      throw error;
+    }
+  }
+
+  async deleteExpiredSessions() {
+    try {
+      const sessions = await this.repository.destroy({
+        where: {
+          createdAt: {
+            [Op.lt]: new Date(new Date() - tokenExpiration * 1000),
+          },
+        },
+      });
+
+      return sessions;
+    } catch (error) {
       throw error;
     }
   }

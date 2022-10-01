@@ -19,7 +19,7 @@ module.exports = class UserRepository {
 
   async findAll() {
     try {
-      const users = await this.repository.findAll();
+      const users = await this.repository.findAll({ raw: true });
 
       return users;
     } catch (error) {
@@ -29,11 +29,14 @@ module.exports = class UserRepository {
 
   async findByEmail(email) {
     try {
-      const user = (await this.repository.findAll({
-        where: {
-          email,
-        },
-      }))[0]?.dataValues;
+      const user = (
+        await this.repository.findAll({
+          raw: true,
+          where: {
+            email,
+          },
+        })
+      )[0];
 
       return user;
     } catch (error) {
@@ -44,11 +47,14 @@ module.exports = class UserRepository {
 
   async findByMobile(mobile) {
     try {
-      const user = (await this.repository.findAll({
-        where: {
-          mobile,
-        },
-      }))[0]?.dataValues;
+      const user = (
+        await this.repository.findAll({
+          raw: true,
+          where: {
+            mobile,
+          },
+        })
+      )[0];
 
       return user;
     } catch (error) {
@@ -59,11 +65,14 @@ module.exports = class UserRepository {
 
   async findByUserName(userName) {
     try {
-      const user = (await this.repository.findAll({
-        where: {
-          userName,
-        },
-      }))[0]?.dataValues;
+      const user = (
+        await this.repository.findAll({
+          raw: true,
+          where: {
+            userName,
+          },
+        })
+      )[0];
 
       return user;
     } catch (error) {
