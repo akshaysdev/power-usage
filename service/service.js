@@ -2,4 +2,6 @@ const { container } = require('../externalService/dependencyInjection');
 
 const userService = container.resolve('userService');
 
-module.exports = { userService };
+const sessionService = container.resolve('sessionService');
+
+module.exports = { userService, sessionService };

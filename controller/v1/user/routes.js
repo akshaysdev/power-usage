@@ -1,10 +1,14 @@
 const express = require('express');
 const userRouter = express.Router();
 
-const { register, login } = require('./authentication');
+const user = require('./authentication');
+const { verifyToken } = require('./authorization');
 
-userRouter.post('/register', register);
+userRouter.post('/register', user.register);
 
-userRouter.post('/login', login);
+userRouter.post('/login', user.login);
+
+// TODO: to be removed
+userRouter.get('/all', verifyToken, user.getAllUsers);
 
 module.exports = { userRouter };

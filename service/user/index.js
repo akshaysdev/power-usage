@@ -1,12 +1,15 @@
 const createError = require('http-errors');
 const crypto = require('crypto');
+const jwt = require('jsonwebtoken');
+const { v4: uuidv4 } = require('uuid');
 
 const { validateEmail, validatePassword } = require('../../helpers/user');
-const { hash } = require('../../constants');
+const { hash, tokenExpiration } = require('../../constants');
 
 module.exports = class UserService {
-  constructor({ userRepository }) {
+  constructor({ userRepository, sessionService }) {
     this.userRepository = userRepository;
+    this.sessionService = sessionService;
   }
 
   async validate({ name, email, password, userName, mobile }) {
@@ -35,17 +38,17 @@ module.exports = class UserService {
       }
 
       const existingEmail = await this.userRepository.findByEmail(email);
-      if (existingEmail.length) {
+      if (existingEmail) {
         throw createError(401, 'User already exists');
       }
 
       const existingMobile = await this.userRepository.findByMobile(mobile);
-      if (existingMobile.length) {
+      if (existingMobile) {
         throw createError(401, 'Mobile number already exists');
       }
 
       const existingUserName = await this.userRepository.findByUserName(userName);
-      if (existingUserName.length) {
+      if (existingUserName) {
         throw createError(401, 'UserName already exists');
       }
 
@@ -68,6 +71,7 @@ module.exports = class UserService {
         .toString(`hex`);
       userObject.password = hashedPassword;
 
+      userObject.id = uuidv4();
       await this.userRepository.create(userObject);
 
       return { message: 'Registered Successfully!' };
@@ -77,7 +81,7 @@ module.exports = class UserService {
     }
   }
 
-  async login(credentials) {
+  async login(credentials, userAgent) {
     try {
       const user = await this.userRepository.findByEmail(credentials.email);
       if (!user) {
@@ -91,13 +95,28 @@ module.exports = class UserService {
         throw createError(422, 'Invalid email or password!');
       }
 
-      return { message: 'Logged-In Successfully!' };
+      let accessToken;
+      const session = await this.sessionService.fetchSessionByUserIdAndAgent(user.id, userAgent);
+      if (!session) {
+        accessToken = jwt.sign(
+          { user: { userId: user.id, timeStamp: user.createdAt } },
+          process.env.ACCESS_TOKEN_SECRET,
+          {
+            expiresIn: tokenExpiration,
+          }
+        );
+
+        await this.sessionService.createSession(user.id, accessToken, userAgent);
+      }
+
+      return { message: 'Logged-In Successfully!', accessToken };
     } catch (error) {
-      error.meta = { ...error.meta, 'UserService.login': { credentials } };
+      error.meta = { ...error.meta, 'UserService.login': { credentials, userAgent } };
       throw error;
     }
   }
 
+  // TODO: to be removed
   async findAllUsers() {
     try {
       const users = await this.userRepository.findAll();

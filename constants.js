@@ -5,4 +5,6 @@ const hash = {
   DIGEST: 'sha512',
 };
 
-module.exports = { hash };
+const tokenExpiration = 60 * 5;
+
+module.exports = { hash, tokenExpiration };
