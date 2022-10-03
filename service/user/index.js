@@ -1,10 +1,6 @@
 const createError = require('http-errors');
-const crypto = require('crypto');
-const jwt = require('jsonwebtoken');
-const { v4: uuidv4 } = require('uuid');
 
-const { validateEmail, validatePassword } = require('../../helpers/user');
-const { hash, tokenExpiration } = require('../../constants');
+const { validateEmail, validatePassword, hashPassword, signToken } = require('../../helpers/user');
 
 module.exports = class UserService {
   constructor({ userRepository, sessionService }) {
@@ -39,7 +35,7 @@ module.exports = class UserService {
 
       const existingEmail = await this.userRepository.findByEmail(email);
       if (existingEmail) {
-        throw createError(400, 'User already exists');
+        throw createError(400, 'Email already exists');
       }
 
       const existingMobile = await this.userRepository.findByMobile(mobile);
@@ -63,15 +59,8 @@ module.exports = class UserService {
     try {
       await this.validate(userObject);
 
-      const token = crypto.randomBytes(32).toString('hex');
-      userObject.token = token;
+      userObject.password = hashPassword(userObject.password);
 
-      const hashedPassword = crypto
-        .pbkdf2Sync(userObject.password, hash.SALT, hash.ITERATIONS, hash.KEY_LEN, hash.DIGEST)
-        .toString(`hex`);
-      userObject.password = hashedPassword;
-
-      userObject.id = uuidv4();
       await this.userRepository.create(userObject);
 
       return { message: 'Registered Successfully!' };
@@ -81,39 +70,43 @@ module.exports = class UserService {
     }
   }
 
+  async extractUserCredentials(credentials) {
+    try {
+      const [email, mobile, userName] = await Promise.all([
+        this.userRepository.findByEmail(credentials.email || ''),
+        this.userRepository.findByMobile(credentials.mobile || 0),
+        this.userRepository.findByUserName(credentials.userName || ''),
+      ]);
+
+      const user = email || mobile || userName;
+
+      return user;
+    } catch (error) {
+      error.meta = { ...error.meta, 'UserService.extractUserCredentials': { credentials } };
+      throw error;
+    }
+  }
+
   async login(credentials, userAgent) {
     try {
-      let user;
-      if (credentials.email) {
-        user = await this.userRepository.findByEmail(credentials.email);
-      } else if (credentials.mobile) {
-        user = await this.userRepository.findByMobile(credentials.mobile);
-      } else if (credentials.userName) {
-        user = await this.userRepository.findByUserName(credentials.userName);
-      }
+      const user = await this.extractUserCredentials(credentials);
       if (!user) {
-        throw createError(422, 'Invalid email or password!');
+        throw createError(422, 'Invalid credentials');
       }
 
-      const hashedPassword = crypto
-        .pbkdf2Sync(credentials.password, hash.SALT, hash.ITERATIONS, hash.KEY_LEN, hash.DIGEST)
-        .toString(`hex`);
+      const hashedPassword = hashPassword(credentials.password);
       if (hashedPassword !== user.password) {
-        throw createError(422, 'Invalid email or password!');
+        throw createError(422, 'Invalid credentials');
       }
 
       let accessToken;
-      const session = await this.sessionService.fetchSessionByUserIdAndAgent(user.id, userAgent);
+      const session = await this.sessionService.fetchSessionByAgent(user.id, userAgent);
       if (!session) {
-        accessToken = jwt.sign(
-          { user: { userId: user.id, timeStamp: user.createdAt } },
-          process.env.ACCESS_TOKEN_SECRET,
-          {
-            expiresIn: tokenExpiration,
-          }
-        );
+        accessToken = signToken(user);
 
-        await this.sessionService.createSession(user.id, accessToken, userAgent);
+        await this.sessionService.create(user.id, accessToken, userAgent);
+      } else {
+        accessToken = session.accessToken;
       }
 
       return { message: 'Logged-In Successfully!', accessToken };

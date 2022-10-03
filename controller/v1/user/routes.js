@@ -10,6 +10,6 @@ userRouter.post('/login', user.login);
 
 userRouter.get('/logout', verifyToken, user.logout);
 
-userRouter.get('/sessions', verifyToken, user.fetchAllSessions);
+userRouter.get('/sessions', verifyToken, user.fetchSessions);
 
 module.exports = { userRouter };

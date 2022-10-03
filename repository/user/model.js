@@ -5,7 +5,8 @@ const UserModel = async (sequelize) => {
     'User',
     {
       id: {
-        type: DataTypes.STRING,
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
         primaryKey: true,
       },
       name: {

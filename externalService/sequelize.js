@@ -13,13 +13,13 @@ const sequelize = new Sequelize(database, user, password, {
   logging: false,
 });
 
-(async function (sequelize) {
-  try {
-    await sequelize.authenticate();
+sequelize
+  .authenticate()
+  .then(() => {
     console.log('Connection to the Database has been established successfully...');
-  } catch (error) {
+  })
+  .catch((error) => {
     console.error('Unable to connect to the database:', error);
-  }
-})(sequelize);
+  });
 
 module.exports = { sequelize };

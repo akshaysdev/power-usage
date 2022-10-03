@@ -5,13 +5,14 @@ const SessionModel = async (sequelize) => {
     'Session',
     {
       id: {
-        type: DataTypes.STRING,
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
         primaryKey: true,
       },
       userId: {
-        type: DataTypes.STRING,
+        type: DataTypes.UUID,
         references: {
-          model: sequelize.models.User,
+          model: 'User',
           key: 'id',
         },
         allowNull: false,

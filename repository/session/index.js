@@ -35,7 +35,7 @@ module.exports = class SessionRepository {
     }
   }
 
-  async fetchSessionByUserIdAndAgent(userId, userAgent) {
+  async fetchSessionByAgent(userId, userAgent) {
     try {
       const session = (
         await this.repository.findAll({
@@ -51,13 +51,13 @@ module.exports = class SessionRepository {
     } catch (error) {
       error.meta = {
         ...error.meta,
-        'SessionRepository.fetchSessionByUserIdAndAgent': { userId, userAgent },
+        'SessionRepository.fetchSessionByAgent': { userId, userAgent },
       };
       throw error;
     }
   }
 
-  async deleteSessionByUserIdAndAgent(userId, userAgent) {
+  async deleteSession(userId, userAgent) {
     try {
       const session = await this.repository.destroy({
         where: {
@@ -68,12 +68,12 @@ module.exports = class SessionRepository {
 
       return session;
     } catch (error) {
-      error.meta = { ...error.meta, 'SessionRepository.deleteSessionByUserIdAndAgent': { userId, userAgent } };
+      error.meta = { ...error.meta, 'SessionRepository.deleteSession': { userId, userAgent } };
       throw error;
     }
   }
 
-  async findAllSessionsByUserId(userId) {
+  async findSessions(userId) {
     try {
       const session = await this.repository.findAll({
         raw: true,
@@ -85,7 +85,7 @@ module.exports = class SessionRepository {
 
       return session;
     } catch (error) {
-      error.meta = { ...error.meta, 'SessionRepository.findAllSessionsByUserId': { userId } };
+      error.meta = { ...error.meta, 'SessionRepository.findSessions': { userId } };
       throw error;
     }
   }
@@ -95,7 +95,7 @@ module.exports = class SessionRepository {
       const sessions = await this.repository.destroy({
         where: {
           createdAt: {
-            [Op.lt]: new Date(new Date() - tokenExpiration * 1000),
+            [Op.lte]: new Date(new Date() - tokenExpiration * 1000),
           },
         },
       });

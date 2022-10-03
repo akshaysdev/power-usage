@@ -7,4 +7,6 @@ const hash = {
 
 const tokenExpiration = 60 * 5;
 
-module.exports = { hash, tokenExpiration };
+const applianceTypeEnum = ['low-power', 'mid-power', 'high-power'];
+
+module.exports = { hash, tokenExpiration, applianceTypeEnum };

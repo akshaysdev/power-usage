@@ -28,7 +28,7 @@ const login = async (req, res) => {
 const logout = async (req, res) => {
   try {
     const userAgent = req.headers['user-agent'] + req.socket.remoteAddress;
-    const response = await userService.logout(req.user, userAgent);
+    const response = await userService.logout(req.user.userId, userAgent);
 
     res.cookie('accessToken', '', { httpOnly: true }).status(200).send({ success: true, message: response.message });
   } catch (error) {
@@ -36,9 +36,9 @@ const logout = async (req, res) => {
   }
 };
 
-const fetchAllSessions = async (req, res) => {
+const fetchSessions = async (req, res) => {
   try {
-    const response = await sessionService.findAllSessionsByUserId(req.user.userId);
+    const response = await sessionService.fetchSessions(req.user.userId);
 
     res.status(200).send({ success: true, data: response });
   } catch (error) {
@@ -46,4 +46,4 @@ const fetchAllSessions = async (req, res) => {
   }
 };
 
-module.exports = { register, login, logout, fetchAllSessions };
+module.exports = { register, login, logout, fetchSessions };

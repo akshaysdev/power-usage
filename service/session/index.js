@@ -1,41 +1,35 @@
-const { v4: uuidv4 } = require('uuid');
-
 module.exports = class SessionService {
   constructor({ sessionRepository }) {
     this.sessionRepository = sessionRepository;
   }
 
-  async createSession(userId, accessToken, userAgent) {
+  async create(userId, accessToken, userAgent) {
     try {
-      const sessionObject = {
-        id: uuidv4(),
-        accessToken,
-        userId,
-        userAgent,
-      };
+      const sessionObject = { accessToken, userId, userAgent };
+      
       await this.sessionRepository.create(sessionObject);
 
       return true;
     } catch (error) {
-      error.meta = { ...error.meta, 'SessionService.createSession': { accessToken, userAgent } };
+      error.meta = { ...error.meta, 'SessionService.create': { accessToken, userAgent } };
       throw error;
     }
   }
 
-  async fetchSessionByUserIdAndAgent(userId, userAgent) {
+  async fetchSessionByAgent(userId, userAgent) {
     try {
-      const session = await this.sessionRepository.fetchSessionByUserIdAndAgent(userId, userAgent);
+      const session = await this.sessionRepository.fetchSessionByAgent(userId, userAgent);
 
       return session;
     } catch (error) {
-      error.meta = { ...error.meta, 'SessionService.fetchSessionByUserIdAndAgent': { userId, userAgent } };
+      error.meta = { ...error.meta, 'SessionService.fetchSessionByAgent': { userId, userAgent } };
       throw error;
     }
   }
 
   async remove(userId, userAgent) {
     try {
-      await this.sessionRepository.deleteSessionByUserIdAndAgent(userId, userAgent);
+      await this.sessionRepository.deleteSession(userId, userAgent);
 
       return true;
     } catch (error) {
@@ -54,13 +48,13 @@ module.exports = class SessionService {
     }
   }
 
-  async findAllSessionsByUserId(userId) {
+  async fetchSessions(userId) {
     try {
-      const sessions = await this.sessionRepository.findAllSessionsByUserId(userId);
+      const sessions = await this.sessionRepository.findSessions(userId);
 
       return sessions;
     } catch (error) {
-      error.meta = { ...error.meta, 'SessionService.findAllSessionsByUserId': { userId } };
+      error.meta = { ...error.meta, 'SessionService.fetchSessions': { userId } };
       throw error;
     }
   }

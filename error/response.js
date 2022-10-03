@@ -19,6 +19,16 @@ const response = (error) => {
   };
 };
 
+/**
+ * If the error status is 500, return a 500 status code with a message. Otherwise, return a 403 status
+ * code with a message
+ * @param error - The error object that was thrown.
+ * @param req - The request object.
+ * @param res - The response object
+ * @param next - This is a function that will be called if the middleware function doesn't end the
+ * request-response cycle.
+ * @returns A response object
+ */
 const authError = (error, req, res, next) => {
   // TODO: console log need to be removed
   console.log(`🚀 ~ file: response.js ~ line 23 ~ authError ~ error`, error);
