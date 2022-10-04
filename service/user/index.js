@@ -12,6 +12,11 @@ module.exports = class UserService {
     this.queueBackgroundJob = queueBackgroundJob;
   }
 
+  /**
+   * It validates the user input and throws an error if any of the required fields are missing or if
+   * the email, mobile number or userName already exists
+   * @returns A boolean value
+   */
   async validate({ name, email, password, userName, mobile }) {
     try {
       if (!name) {
@@ -59,6 +64,12 @@ module.exports = class UserService {
     }
   }
 
+  /**
+   * It takes a user object, validates it, hashes the password, and then creates the user in the
+   * database
+   * @param userObject - The object that contains the user's information.
+   * @returns { message: 'Registered Successfully!' }
+   */
   async register(userObject) {
     try {
       await this.validate(userObject);
@@ -74,6 +85,11 @@ module.exports = class UserService {
     }
   }
 
+  /**
+   * It takes in a credentials object and returns a user object
+   * @param credentials - The user's credentials.
+   * @returns The user object
+   */
   async extractUserCredentials(credentials) {
     try {
       const [email, mobile, userName] = await Promise.all([
@@ -91,6 +107,12 @@ module.exports = class UserService {
     }
   }
 
+  /**
+   * It takes in a user's credentials and userAgent, extracts the user's credentials, hashes the
+   * password, signs a token, and returns the token
+   * @param credentials - The user's credentials.
+   * @param userAgent - The user agent of the client.
+   */
   async login(credentials, userAgent) {
     try {
       const user = await this.extractUserCredentials(credentials);
@@ -125,6 +147,12 @@ module.exports = class UserService {
     }
   }
 
+  /**
+   * It queues a background job to remove the session of the user with the given userId and userAgent
+   * @param userId - The userId of the user who is logging out.
+   * @param userAgent - The user agent of the user's browser.
+   * @returns A message saying that the user has been logged out successfully.
+   */
   async logout(userId, userAgent) {
     try {
       this.queueBackgroundJob({
@@ -141,6 +169,11 @@ module.exports = class UserService {
     }
   }
 
+  /**
+   * It updates the user's streak and lastStreak fields in the database and then queues a background
+   * job to update the user's streak in the cache
+   * @returns A boolean value
+   */
   async updateStreak({ userId, date }) {
     try {
       const user = await this.userRepository.findById(userId);
@@ -169,6 +202,11 @@ module.exports = class UserService {
     }
   }
 
+  /**
+   * It gets the streak from the cache service
+   * @param userId - The user's ID
+   * @returns The streak of the user
+   */
   async getStreak(userId) {
     try {
       const streak = await this.cacheService.getStreak(userId);
@@ -180,6 +218,11 @@ module.exports = class UserService {
     }
   }
 
+  /**
+   * It updates the streak of all users to zero and then queues a background job to cache the streaks
+   * of all users
+   * @returns The users that were updated.
+   */
   async updateStreakToZero() {
     try {
       const users = await this.userRepository.updateStreakToZero();

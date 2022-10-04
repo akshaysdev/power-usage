@@ -1,5 +1,10 @@
 const { DataTypes } = require('sequelize');
 
+/**
+ * It creates a table called Session with the following columns: id, userId, accessToken, userAgent,
+ * createdAt, and updatedAt
+ * @param sequelize - The sequelize instance
+ */
 const SessionModel = async (sequelize) => {
   const Session = await sequelize.define(
     'Session',

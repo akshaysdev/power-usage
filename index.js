@@ -7,11 +7,15 @@ const router = require('./controller/router');
 
 const { removeExpiredSessionsJob, updateStreakToZeroJob } = require('./helpers/cronJob');
 
+/* Used to parse the incoming request bodies in a middleware before your handlers, available under the
+req.body property. */
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+/* Calling the router function and passing the app object to it. */
 router(app);
 
+/* This is the port that the server is listening to. */
 app.listen(process.env.PORT, () => {
   console.log(`Server is running on port ${process.env.PORT}`);
 });

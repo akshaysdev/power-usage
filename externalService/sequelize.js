@@ -6,6 +6,7 @@ const database = process.env.POSTGRES_DATABASE;
 const password = process.env.POSTGRES_PASSWORD;
 const port = process.env.POSTGRES_PORT;
 
+/* Creating a new instance of Sequelize and connecting to the database. */
 const sequelize = new Sequelize(database, user, password, {
   host,
   port,
@@ -13,6 +14,7 @@ const sequelize = new Sequelize(database, user, password, {
   logging: false,
 });
 
+/* Checking to see if the connection to the database is working. */
 sequelize
   .authenticate()
   .then(() => {

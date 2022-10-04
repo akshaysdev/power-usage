@@ -4,6 +4,11 @@ const { sequelize } = require('./sequelize');
 const { queueBackgroundJobs } = require('./bull');
 const { redis } = require('./redis');
 
+/**
+ * It creates a container, registers the sequelize instance, the queueBackgroundJobs function, and the
+ * redis client, and then loads all the files in the repository and service directories
+ * @returns A function that returns a container.
+ */
 const Container = () => {
   const container = createContainer();
 

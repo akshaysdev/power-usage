@@ -9,6 +9,11 @@ module.exports = class UserRepository {
     this.repository = sequelize.models.User;
   }
 
+  /**
+   * It creates a user
+   * @param userObject - The object that will be used to create the user.
+   * @returns The user object
+   */
   async create(userObject) {
     try {
       const user = await this.repository.create(userObject);
@@ -20,6 +25,11 @@ module.exports = class UserRepository {
     }
   }
 
+  /**
+   * It finds a user by their id
+   * @param userId - The id of the user we want to find.
+   * @returns The user object with the id, lastStreak, streak, and createdAt attributes.
+   */
   async findById(userId) {
     try {
       const user = (
@@ -39,6 +49,12 @@ module.exports = class UserRepository {
     }
   }
 
+  /**
+   * It updates a user in the database
+   * @param userId - The id of the user to update
+   * @param updateData - The data to update the user with.
+   * @returns The user object
+   */
   async updateUser(userId, updateData) {
     try {
       const user = (
@@ -59,6 +75,11 @@ module.exports = class UserRepository {
     }
   }
 
+  /**
+   * It updates the streak of all users who have a streak greater than zero and whose lastStreak is less
+   * than yesterday's date to zero
+   * @returns An array of users with their id, lastStreak, and streak.
+   */
   async updateStreakToZero() {
     try {
       const users = (
@@ -68,7 +89,7 @@ module.exports = class UserRepository {
             where: {
               [Op.and]: {
                 streak: { [Op.gt]: 0 },
-                lastStreak: { [Op.gte]: moment().utc().startOf('day').subtract(1, 'day') },
+                lastStreak: { [Op.lt]: moment().utc().startOf('day').subtract(1, 'day') },
               },
             },
             attributes: ['id', 'lastStreak', 'streak'],
@@ -84,6 +105,11 @@ module.exports = class UserRepository {
     }
   }
 
+  /**
+   * It finds a user by email
+   * @param email - The email address of the user to find.
+   * @returns The user object with the id, email, and password.
+   */
   async findByEmail(email) {
     try {
       const user = (
@@ -103,6 +129,11 @@ module.exports = class UserRepository {
     }
   }
 
+  /**
+   * It finds a user by their mobile number
+   * @param mobile - The mobile number of the user.
+   * @returns The user object with the id, mobile, and password.
+   */
   async findByMobile(mobile) {
     try {
       const user = (
@@ -122,6 +153,11 @@ module.exports = class UserRepository {
     }
   }
 
+  /**
+   * It finds a user by their userName
+   * @param userName - The userName of the user we want to find.
+   * @returns The user object with the id, userName, and password.
+   */
   async findByUserName(userName) {
     try {
       const user = (

@@ -3,6 +3,13 @@ const { tokenExpiration, jobType } = require('../../../constants');
 const { queueBackgroundJobs } = require('../../../externalService/bull');
 const { sessionService } = require('../../../service/service');
 
+/**
+ * It verifies the token and if it's valid, it adds the user to the request object and
+ * calls the next middleware
+ * @param req - The request object.
+ * @param res - The response object.
+ * @param next - The next middleware function in the stack.
+ */
 const verifyToken = async (req, res, next) => {
   let token;
   try {

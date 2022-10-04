@@ -10,6 +10,10 @@ module.exports = class PowerUsageService {
     this.queueBackgroundJob = queueBackgroundJob;
   }
 
+  /**
+   * It validates the input parameters and throws an error if any of the parameters are invalid
+   * @returns a boolean value.
+   */
   async validate({ fromTime, toTime, duration, unitConsumed, applianceType }) {
     try {
       if (!fromTime) {
@@ -55,6 +59,11 @@ module.exports = class PowerUsageService {
     }
   }
 
+  /**
+   * It creates a new power usage object and then queues a background job to update the user's streak
+   * @param powerUsageObject - The object that you want to create.
+   * @returns The powerUsage object
+   */
   async create(powerUsageObject) {
     try {
       await this.validate(powerUsageObject);
@@ -75,6 +84,13 @@ module.exports = class PowerUsageService {
     }
   }
 
+  /**
+   * It fetches power usage data for a given user, between a given start and end date
+   * @param userId - The userId of the user whose power usage we want to fetch.
+   * @param startDate - The start date of the period you want to fetch the power usage for.
+   * @param endDate - The end date of the period for which you want to fetch the power usage.
+   * @returns An array of power usage objects
+   */
   async fetchUsage(userId, startDate, endDate) {
     try {
       const powerUsages = await this.powerUsageRepository.findUsage(userId, startDate, endDate);
@@ -86,6 +102,12 @@ module.exports = class PowerUsageService {
     }
   }
 
+  /**
+   * It fetches power usages for a user between a start date and an end date and groups them by day
+   * @param userId - The userId of the user whose power usage is to be fetched.
+   * @param startDate - The start date of the period for which you want to fetch the power usage.
+   * @param endDate - The end date of the period for which the power usage is to be fetched.
+   */
   async fetchUsagesDayWise(userId, startDate, endDate) {
     try {
       const powerUsages = await this.powerUsageRepository.findUsage(userId, startDate, endDate);

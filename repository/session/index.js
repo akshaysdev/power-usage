@@ -8,6 +8,11 @@ module.exports = class SessionRepository {
     this.repository = sequelize.models.Session;
   }
 
+  /**
+   * It creates a session
+   * @param sessionObject - The object that will be used to create the session.
+   * @returns A session object
+   */
   async create(sessionObject) {
     try {
       const session = await this.repository.create(sessionObject);
@@ -19,6 +24,11 @@ module.exports = class SessionRepository {
     }
   }
 
+  /**
+   * Find all sessions for a given userId
+   * @param userId - The userId of the user whose sessions we want to find.
+   * @returns An array of sessions
+   */
   async findByUserId(userId) {
     try {
       const sessions = await this.repository.findAll({
@@ -35,6 +45,12 @@ module.exports = class SessionRepository {
     }
   }
 
+  /**
+   * Fetch a session by userId and userAgent
+   * @param userId - The userId of the user who's session we're fetching.
+   * @param userAgent - The user agent of the browser that the user is using.
+   * @returns The session object
+   */
   async fetchSessionByAgent(userId, userAgent) {
     try {
       const session = (
@@ -57,6 +73,14 @@ module.exports = class SessionRepository {
     }
   }
 
+  /**
+   * Delete a session from the database
+   * The first thing we do is try to delete the session from the database. If it succeeds, we return
+   * the session. If it fails, we throw an error
+   * @param userId - The user's id
+   * @param userAgent - The user agent of the browser that the user is using.
+   * @returns The session is being returned.
+   */
   async deleteSession(userId, userAgent) {
     try {
       const session = await this.repository.destroy({
@@ -73,6 +97,11 @@ module.exports = class SessionRepository {
     }
   }
 
+  /**
+   * It finds all sessions for a given user
+   * @param userId - The userId of the user whose sessions you want to find.
+   * @returns An array of objects with the userAgent and loggedInTime.
+   */
   async findSessions(userId) {
     try {
       const session = await this.repository.findAll({
@@ -90,6 +119,13 @@ module.exports = class SessionRepository {
     }
   }
 
+  /**
+   * It returns a list of all the sessions in the database
+   * @returns An array of objects with the following properties:
+   *   userId: The id of the user who is logged in
+   *   userAgent: The user agent of the user who is logged in
+   *   loggedInTime: The time the user logged in
+   */
   async findAllSessions() {
     try {
       const sessions = await this.repository.findAll({
@@ -103,6 +139,10 @@ module.exports = class SessionRepository {
     }
   }
 
+ /**
+  * It deletes all sessions that were created before the current time minus the token expiration time
+  * @returns A boolean value.
+  */
   async deleteExpiredSessions() {
     try {
       await this.repository.destroy({

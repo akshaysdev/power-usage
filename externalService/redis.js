@@ -5,8 +5,8 @@ const options = { port: process.env.REDIS_PORT, host: process.env.REDIS_HOST, db
 const redis = new Redis(options);
 
 /**
- * @description Connect to the redis
- * @returns {Object} The redis client.
+ * It creates a new Redis client, and returns it
+ * @returns A function that returns a redis client.
  */
 const RedisClient = () => {
   const client = redis;

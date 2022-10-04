@@ -1,6 +1,11 @@
 const { response } = require('../../../error/response');
 const { userService, sessionService } = require('../../../service/service');
 
+/**
+ * It registers a new user
+ * @param req - The request object.
+ * @param res - The response object.
+ */
 const register = async (req, res) => {
   try {
     const response = await userService.register(req.body);
@@ -11,6 +16,11 @@ const register = async (req, res) => {
   }
 };
 
+/**
+ * It takes the user's credentials, logs them in, and returns a cookie with the access token
+ * @param req - The request object.
+ * @param res - The response object.
+ */
 const login = async (req, res) => {
   try {
     const userAgent = req.headers['user-agent'] + req.socket.remoteAddress;
@@ -25,6 +35,11 @@ const login = async (req, res) => {
   }
 };
 
+/**
+ * It logs out the user and deletes the access token from the cookie
+ * @param req - The request object.
+ * @param res - The response object.
+ */
 const logout = async (req, res) => {
   try {
     const userAgent = req.headers['user-agent'] + req.socket.remoteAddress;
@@ -36,6 +51,11 @@ const logout = async (req, res) => {
   }
 };
 
+/**
+ * It fetches all the sessions for a user
+ * @param req - The request object.
+ * @param res - The response object.
+ */
 const fetchSessions = async (req, res) => {
   try {
     const response = await sessionService.fetchSessions(req.user.userId);

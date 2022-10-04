@@ -1,5 +1,10 @@
 const { DataTypes } = require('sequelize');
 
+/**
+ * It creates a table called User with the following columns: id, name, userName, email, mobile,
+ * password, lastStreak, streak
+ * @param sequelize - The sequelize instance.
+ */
 const UserModel = async (sequelize) => {
   const User = await sequelize.define(
     'User',

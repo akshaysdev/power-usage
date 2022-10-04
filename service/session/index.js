@@ -7,6 +7,11 @@ module.exports = class SessionService {
     this.queueBackgroundJob = queueBackgroundJob;
   }
 
+  /**
+   * It creates a session object, saves it to the database, and then queues a background job to cache
+   * the session
+   * @returns A boolean value
+   */
   async create({ userId, accessToken, userAgent }) {
     try {
       const sessionObject = { accessToken, userId, userAgent };
@@ -29,6 +34,12 @@ module.exports = class SessionService {
     }
   }
 
+  /**
+   * Fetch a session by userId and userAgent
+   * @param userId - The user's id
+   * @param userAgent - The user agent of the browser that the user is using.
+   * @returns The session object
+   */
   async fetchSessionByAgent(userId, userAgent) {
     try {
       const session = await this.sessionRepository.fetchSessionByAgent(userId, userAgent);
@@ -40,6 +51,10 @@ module.exports = class SessionService {
     }
   }
 
+  /**
+   * It removes a session from the database and then queues a background job to update the cache
+   * @returns A boolean value
+   */
   async remove({ userId, userAgent }) {
     try {
       await this.sessionRepository.deleteSession(userId, userAgent);
@@ -60,6 +75,11 @@ module.exports = class SessionService {
     }
   }
 
+  /**
+   * It removes expired sessions from the database, then queues a background job to cache the remaining
+   * sessions
+   * @returns The sessions that are not expired.
+   */
   async removeExpiredSessions() {
     try {
       await this.sessionRepository.deleteExpiredSessions();
@@ -78,6 +98,11 @@ module.exports = class SessionService {
     }
   }
 
+  /**
+   * Fetches the sessions for a given userId from the cache
+   * @param userId - The userId of the user whose sessions we want to fetch.
+   * @returns An array of sessions
+   */
   async fetchSessions(userId) {
     try {
       const sessions = await this.cacheService.getSession(userId);

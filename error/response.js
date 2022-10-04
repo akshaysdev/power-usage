@@ -4,9 +4,6 @@
  * @returns {Object} { success, message }
  */
 const response = (error) => {
-  // TODO: console log need to be removed
-  console.log(`🚀 ~ file: response.js ~ line 7 ~ response ~ error`, error);
-
   if (error.status === 500) {
     return {
       success: false,
@@ -30,9 +27,6 @@ const response = (error) => {
  * @returns A response object
  */
 const authError = (error, req, res, next) => {
-  // TODO: console log need to be removed
-  console.log(`🚀 ~ file: response.js ~ line 23 ~ authError ~ error`, error);
-
   if (error.status === 500) {
     return res.status(500).send({ success: false, message: 'Internal Server Error' });
   }

@@ -2,6 +2,11 @@ const { DataTypes } = require('sequelize');
 
 const { applianceTypeEnum } = require('../../constants');
 
+/**
+ * It creates a table called PowerUsage with the following columns: id, userId, fromTime, toTime,
+ * duration, unitConsumed, applianceType
+ * @param sequelize - The sequelize instance
+ */
 const PowerUsageModel = async (sequelize) => {
   const PowerUsage = await sequelize.define(
     'PowerUsage',
