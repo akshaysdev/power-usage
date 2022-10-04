@@ -3,15 +3,15 @@ module.exports = class SessionService {
     this.sessionRepository = sessionRepository;
   }
 
-  async create(userId, accessToken, userAgent) {
+  async create({ userId, accessToken, userAgent }) {
     try {
       const sessionObject = { accessToken, userId, userAgent };
-      
+
       await this.sessionRepository.create(sessionObject);
 
       return true;
     } catch (error) {
-      error.meta = { ...error.meta, 'SessionService.create': { accessToken, userAgent } };
+      error.meta = { ...error.meta, 'SessionService.create': { userId, accessToken, userAgent } };
       throw error;
     }
   }
@@ -27,7 +27,7 @@ module.exports = class SessionService {
     }
   }
 
-  async remove(userId, userAgent) {
+  async remove({ userId, userAgent }) {
     try {
       await this.sessionRepository.deleteSession(userId, userAgent);
 

@@ -9,4 +9,12 @@ const tokenExpiration = 60 * 5;
 
 const applianceTypeEnum = ['low-power', 'mid-power', 'high-power'];
 
-module.exports = { hash, tokenExpiration, applianceTypeEnum };
+const jobType = {
+  removeSession: { name: 'removeSession', concurrency: 1 },
+  createSession: { name: 'createSession', concurrency: 1 },
+  removeExpiredSessions: { name: 'removeExpiredSessions', concurrency: 1 },
+  updateStreak: { name: 'updateStreak', concurrency: 1 },
+  updateStreakToZero: { name: 'updateStreakToZero', concurrency: 1 },
+};
+
+module.exports = { hash, tokenExpiration, applianceTypeEnum, jobType };

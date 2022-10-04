@@ -1,3 +1,6 @@
+const moment = require('moment');
+const { Op } = require('sequelize');
+
 const { UserModel } = require('./model');
 
 module.exports = class UserRepository {
@@ -23,6 +26,79 @@ module.exports = class UserRepository {
 
       return users;
     } catch (error) {
+      throw error;
+    }
+  }
+
+  async findById(userId) {
+    try {
+      const user = (
+        await this.repository.findAll({
+          raw: true,
+          where: {
+            id: userId,
+          },
+        })
+      )[0];
+
+      return user;
+    } catch (error) {
+      error.meta = { ...error.meta, 'UserRepository.findById': { userId } };
+      throw error;
+    }
+  }
+
+  async updateUser(userId, updateData) {
+    try {
+      await this.repository.update(updateData, {
+        where: {
+          id: userId,
+        },
+      });
+
+      return true;
+    } catch (error) {
+      error.meta = { ...error.meta, 'UserRepository.updateUser': { userId, updateData } };
+      throw error;
+    }
+  }
+
+  async updateStreakToZero() {
+    try {
+      await this.repository.update(
+        { streak: 0 },
+        {
+          raw: true,
+          where: {
+            [Op.and]: {
+              streak: { [Op.gt]: 0 },
+              lastStreak: { [Op.gte]: moment().utc().startOf('day').subtract(1, 'day') },
+            },
+          },
+        }
+      );
+
+      return true;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getStreak(userId) {
+    try {
+      const streakData = (
+        await this.repository.findAll({
+          raw: true,
+          where: {
+            id: userId,
+          },
+          attributes: ['lastStreak', 'streak'],
+        })
+      )[0];
+
+      return streakData;
+    } catch (error) {
+      error.meta = { ...error.meta, 'UserRepository.getStreak': { userId } };
       throw error;
     }
   }

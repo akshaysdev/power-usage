@@ -1,5 +1,5 @@
 const { response } = require('../../../error/response');
-const { powerUsageService } = require('../../../service/service');
+const { powerUsageService, userService } = require('../../../service/service');
 
 const create = async (req, res) => {
   try {
@@ -38,4 +38,14 @@ const fetchUsageDayWise = async (req, res) => {
   }
 };
 
-module.exports = { create, fetchUsage, fetchUsageDayWise };
+const getStreak = async (req, res) => {
+  try {
+    const response = await userService.getStreak(req.user.userId);
+
+    res.status(200).send({ success: true, data: response });
+  } catch (error) {
+    res.status(error.status || 500).send(response(error));
+  }
+};
+
+module.exports = { create, fetchUsage, fetchUsageDayWise, getStreak };

@@ -1,11 +1,14 @@
 const createError = require('http-errors');
+const moment = require('moment');
+const { jobType } = require('../../constants');
 
 const { validateEmail, validatePassword, hashPassword, signToken } = require('../../helpers/user');
 
 module.exports = class UserService {
-  constructor({ userRepository, sessionService }) {
+  constructor({ userRepository, sessionService, queueBackgroundJob }) {
     this.userRepository = userRepository;
     this.sessionService = sessionService;
+    this.queueBackgroundJob = queueBackgroundJob;
   }
 
   async validate({ name, email, password, userName, mobile }) {
@@ -104,7 +107,12 @@ module.exports = class UserService {
       if (!session) {
         accessToken = signToken(user);
 
-        await this.sessionService.create(user.id, accessToken, userAgent);
+        this.queueBackgroundJob({
+          name: jobType.createSession.name,
+          meta: { userId: user.id, accessToken, userAgent },
+          className: this.sessionService,
+          functionName: this.sessionService.create,
+        });
       } else {
         accessToken = session.accessToken;
       }
@@ -118,11 +126,59 @@ module.exports = class UserService {
 
   async logout(userId, userAgent) {
     try {
-      await this.sessionService.remove(userId, userAgent);
+      this.queueBackgroundJob({
+        name: jobType.removeSession.name,
+        meta: { userId, userAgent },
+        className: this.sessionService,
+        functionName: this.sessionService.remove,
+      });
 
       return { message: 'Logged-Out Successfully!' };
     } catch (error) {
       error.meta = { ...error.meta, 'UserService.logout': { userId, userAgent } };
+      throw error;
+    }
+  }
+
+  async updateStreak({ userId, date }) {
+    try {
+      const user = await this.userRepository.findById(userId);
+      const updateData = { streak: user.streak, lastStreak: user.lastStreak };
+
+      const lastStreak = moment(user.lastStreak).utc().startOf('day').add(1, 'day');
+      const currentstreak = moment(date).utc().startOf('day');
+
+      if (lastStreak.isSame(currentstreak)) updateData.streak += 1;
+      else updateData.streak = 1;
+
+      updateData.lastStreak = currentstreak;
+
+      await this.userRepository.updateUser(userId, updateData);
+
+      return true;
+    } catch (error) {
+      error.meta = { ...error.meta, 'UserService.updateStreak': { userId, date } };
+      throw error;
+    }
+  }
+
+  async getStreak(userId, date) {
+    try {
+      const user = await this.userRepository.getStreak(userId);
+
+      return user;
+    } catch (error) {
+      error.meta = { ...error.meta, 'UserService.getStreak': { userId, date } };
+      throw error;
+    }
+  }
+
+  async updateStreakToZero() {
+    try {
+      await this.userRepository.updateStreakToZero();
+
+      return true;
+    } catch (error) {
       throw error;
     }
   }

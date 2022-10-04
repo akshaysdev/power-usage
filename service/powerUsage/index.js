@@ -1,11 +1,13 @@
 const createError = require('http-errors');
 
-const { applianceTypeEnum } = require('../../constants');
+const { applianceTypeEnum, jobType } = require('../../constants');
 const { isValidDate, compareTime, groupByDayWisePowerConsumed } = require('../../helpers/powerUsage');
 
 module.exports = class PowerUsageService {
-  constructor({ powerUsageRepository }) {
+  constructor({ powerUsageRepository, userService, queueBackgroundJob }) {
     this.powerUsageRepository = powerUsageRepository;
+    this.userService = userService;
+    this.queueBackgroundJob = queueBackgroundJob;
   }
 
   async validate({ fromTime, toTime, duration, unitConsumed, applianceType }) {
@@ -58,6 +60,13 @@ module.exports = class PowerUsageService {
       await this.validate(powerUsageObject);
 
       const powerUsage = await this.powerUsageRepository.create(powerUsageObject);
+
+      this.queueBackgroundJob({
+        name: jobType.updateStreak.name,
+        meta: { userId: powerUsage.userId, date: powerUsage.fromTime },
+        className: this.userService,
+        functionName: this.userService.updateStreak,
+      });
 
       return powerUsage;
     } catch (error) {

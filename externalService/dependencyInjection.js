@@ -1,11 +1,13 @@
 const { Lifetime, createContainer, asValue, asClass } = require('awilix');
 
 const { sequelize } = require('./sequelize');
+const { queueBackgroundJobs } = require('./bull');
 
 const Container = () => {
   const container = createContainer();
 
   container.register('sequelize', asValue(sequelize));
+  container.register('queueBackgroundJob', asValue(queueBackgroundJobs));
 
   const options = {
     cwd: __dirname,

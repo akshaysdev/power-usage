@@ -10,4 +10,6 @@ powerUsageRouter.get('/list', verifyToken, powerUsage.fetchUsage);
 
 powerUsageRouter.get('/day-wise', verifyToken, powerUsage.fetchUsageDayWise);
 
+powerUsageRouter.get('/streak', verifyToken, powerUsage.getStreak);
+
 module.exports = { powerUsageRouter };

@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
-const { tokenExpiration } = require('../../../constants');
+const { tokenExpiration, jobType } = require('../../../constants');
+const { queueBackgroundJobs } = require('../../../externalService/bull');
 const { sessionService } = require('../../../service/service');
 
 const verifyToken = async (req, res, next) => {
@@ -20,7 +21,12 @@ const verifyToken = async (req, res, next) => {
     try {
       if ((currentTimeStamp - timeStamp) / 1000 > tokenExpiration) {
         const userAgent = req.headers['user-agent'] + req.socket.remoteAddress;
-        await sessionService.remove(decode.user.userId, userAgent);
+        await queueBackgroundJobs({
+          name: jobType.removeSession.name,
+          meta: { userId: decode.user.userId, userAgent },
+          className: sessionService,
+          functionName: sessionService.remove,
+        });
       }
     } catch (error) {
       next(error);
