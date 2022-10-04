@@ -3,13 +3,14 @@ const { DataTypes } = require('sequelize');
 const { applianceTypeEnum } = require('../../constants');
 
 const PowerUsageModel = async (sequelize) => {
-  await sequelize.define(
+  const PowerUsage = await sequelize.define(
     'PowerUsage',
     {
       id: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
         primaryKey: true,
+        unique: true,
       },
       userId: {
         type: DataTypes.UUID,
@@ -43,10 +44,16 @@ const PowerUsageModel = async (sequelize) => {
     {
       timestamps: true,
       freezeTableName: true,
+      indexes: [
+        {
+          unique: false,
+          fields: ['userId'],
+        },
+      ],
     }
   );
 
-  await sequelize.sync({ });
+  await PowerUsage.sync({ alter: { drop: false } });
 };
 
 module.exports = { PowerUsageModel };

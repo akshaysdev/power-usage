@@ -22,6 +22,7 @@ module.exports = class PowerUsageRepository {
     try {
       const powerUsages = await this.repository.findAll({
         raw: true,
+        attributes: ['fromTime', 'toTime', 'duration', 'unitConsumed', 'applianceType'],
         where: {
           [Op.and]: {
             userId,

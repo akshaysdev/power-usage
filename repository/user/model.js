@@ -1,13 +1,14 @@
 const { DataTypes } = require('sequelize');
 
 const UserModel = async (sequelize) => {
-  await sequelize.define(
+  const User = await sequelize.define(
     'User',
     {
       id: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
         primaryKey: true,
+        unique: true,
       },
       name: {
         type: DataTypes.STRING,
@@ -32,14 +33,30 @@ const UserModel = async (sequelize) => {
         type: DataTypes.STRING,
         allowNull: false,
       },
+      lastStreak: {
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW,
+        allowNull: false,
+      },
+      streak: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0,
+        allowNull: false,
+      },
     },
     {
       timestamps: true,
       freezeTableName: true,
+      index: [
+        {
+          unique: true,
+          fields: ['id', 'userName', 'email', 'mobile']
+        }
+      ],
     }
   );
 
-  await sequelize.sync({});
+  await User.sync({ alter: { drop: false } });
 };
 
 module.exports = { UserModel };

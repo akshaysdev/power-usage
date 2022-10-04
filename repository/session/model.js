@@ -1,13 +1,14 @@
 const { DataTypes } = require('sequelize');
 
 const SessionModel = async (sequelize) => {
-  await sequelize.define(
+  const Session = await sequelize.define(
     'Session',
     {
       id: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
         primaryKey: true,
+        unique: true,
       },
       userId: {
         type: DataTypes.UUID,
@@ -30,10 +31,16 @@ const SessionModel = async (sequelize) => {
     {
       timestamps: true,
       freezeTableName: true,
+      indexes: [
+        {
+          unique: false,
+          fields: ['userId', 'userAgent'],
+        },
+      ],
     }
   );
 
-  await sequelize.sync({});
+  await Session.sync({ alter: { drop: false } });
 };
 
 module.exports = { SessionModel };

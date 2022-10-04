@@ -80,7 +80,7 @@ module.exports = class SessionRepository {
         where: {
           userId,
         },
-        attributes: ['userId', 'userAgent', ['createdAt', 'loggedInTime']],
+        attributes: ['userAgent', ['createdAt', 'loggedInTime']],
       });
 
       return session;
