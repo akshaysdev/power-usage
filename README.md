@@ -1,6 +1,6 @@
 ## Instructions
 
-1. Install node and install nvm. Go to the root folder and run
+Install node and install nvm. Go to the root folder and run
 
 ```bash
 nvm use
@@ -11,9 +11,9 @@ then,
 npm install
 ```
 
-2. Install postgres and redis to your system and start both the servers
+Install postgres and redis to your system and start both the servers
 
-3. Create .env file in the root folder
+Create .env file in the root folder
 
 ```.env
 PORT
@@ -28,13 +28,13 @@ REDIS_HOST
 REDIS_DB
 ```
 
-4. Start the node server
+Start the node server
 
 ```bash
 npm start
 ```
 
-5. Instead you can run all the services with docker, install docker and docker-compose, and then,
+### Instead you can run all the services with docker, install docker and docker-compose, and then,
 
 ```bash
 docker-compose up --build
@@ -42,7 +42,7 @@ docker-compose up --build
 
 ### Or run your docker services separately,
 
-References,
+#### Options,
 ```
 d = runs a detached container
 rm = removes the container when the respective server is stopped

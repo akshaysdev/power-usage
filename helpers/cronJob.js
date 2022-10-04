@@ -9,7 +9,7 @@ const { sessionService, userService } = require('../service/service');
  */
 const removeExpiredSessionsJob = new CronJob('*/5 * * * *', async function () {
   try {
-    await queueBackgroundJobs({
+    queueBackgroundJobs({
       name: jobType.removeExpiredSessions.name,
       meta: {},
       className: sessionService,
@@ -25,7 +25,7 @@ const removeExpiredSessionsJob = new CronJob('*/5 * * * *', async function () {
  */
 const updateStreakToZeroJob = new CronJob('0 0 * * *', async function () {
   try {
-    await queueBackgroundJobs({
+    queueBackgroundJobs({
       name: jobType.updateStreakToZero.name,
       meta: {},
       className: userService,

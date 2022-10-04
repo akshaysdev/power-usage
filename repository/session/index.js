@@ -90,9 +90,22 @@ module.exports = class SessionRepository {
     }
   }
 
+  async findAllSessions() {
+    try {
+      const sessions = await this.repository.findAll({
+        raw: true,
+        attributes: ['userId', 'userAgent', ['createdAt', 'loggedInTime']],
+      });
+
+      return sessions;
+    } catch (error) {
+      throw error;
+    }
+  }
+
   async deleteExpiredSessions() {
     try {
-      const sessions = await this.repository.destroy({
+      await this.repository.destroy({
         where: {
           createdAt: {
             [Op.lte]: new Date(new Date() - tokenExpiration * 1000),
@@ -100,7 +113,7 @@ module.exports = class SessionRepository {
         },
       });
 
-      return sessions;
+      return true;
     } catch (error) {
       throw error;
     }

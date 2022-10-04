@@ -20,16 +20,6 @@ module.exports = class UserRepository {
     }
   }
 
-  async findAll() {
-    try {
-      const users = await this.repository.findAll({ raw: true });
-
-      return users;
-    } catch (error) {
-      throw error;
-    }
-  }
-
   async findById(userId) {
     try {
       const user = (
@@ -38,6 +28,7 @@ module.exports = class UserRepository {
           where: {
             id: userId,
           },
+          attributes: ['id', 'lastStreak', 'streak', 'createdAt'],
         })
       )[0];
 
@@ -50,13 +41,18 @@ module.exports = class UserRepository {
 
   async updateUser(userId, updateData) {
     try {
-      await this.repository.update(updateData, {
-        where: {
-          id: userId,
-        },
-      });
+      const user = (
+        await this.repository.update(updateData, {
+          where: {
+            id: userId,
+          },
+          returning: true,
+          raw: true,
+          plain: true,
+        })
+      )[1];
 
-      return true;
+      return user;
     } catch (error) {
       error.meta = { ...error.meta, 'UserRepository.updateUser': { userId, updateData } };
       throw error;
@@ -65,40 +61,25 @@ module.exports = class UserRepository {
 
   async updateStreakToZero() {
     try {
-      await this.repository.update(
-        { streak: 0 },
-        {
-          raw: true,
-          where: {
-            [Op.and]: {
-              streak: { [Op.gt]: 0 },
-              lastStreak: { [Op.gte]: moment().utc().startOf('day').subtract(1, 'day') },
+      const users = (
+        await this.repository.update(
+          { streak: 0 },
+          {
+            where: {
+              [Op.and]: {
+                streak: { [Op.gt]: 0 },
+                lastStreak: { [Op.gte]: moment().utc().startOf('day').subtract(1, 'day') },
+              },
             },
-          },
-        }
-      );
+            attributes: ['id', 'lastStreak', 'streak'],
+            returning: true,
+            raw: true,
+          }
+        )
+      )[1];
 
-      return true;
+      return users;
     } catch (error) {
-      throw error;
-    }
-  }
-
-  async getStreak(userId) {
-    try {
-      const streakData = (
-        await this.repository.findAll({
-          raw: true,
-          where: {
-            id: userId,
-          },
-          attributes: ['lastStreak', 'streak'],
-        })
-      )[0];
-
-      return streakData;
-    } catch (error) {
-      error.meta = { ...error.meta, 'UserRepository.getStreak': { userId } };
       throw error;
     }
   }
@@ -111,6 +92,7 @@ module.exports = class UserRepository {
           where: {
             email,
           },
+          attributes: ['id', 'email', 'password'],
         })
       )[0];
 
@@ -129,6 +111,7 @@ module.exports = class UserRepository {
           where: {
             mobile,
           },
+          attributes: ['id', 'mobile', 'password'],
         })
       )[0];
 
@@ -147,6 +130,7 @@ module.exports = class UserRepository {
           where: {
             userName,
           },
+          attributes: ['id', 'userName', 'password'],
         })
       )[0];
 

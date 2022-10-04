@@ -1,6 +1,10 @@
+const { jobType } = require('../../constants');
+
 module.exports = class SessionService {
-  constructor({ sessionRepository }) {
+  constructor({ sessionRepository, cacheService, queueBackgroundJob }) {
     this.sessionRepository = sessionRepository;
+    this.cacheService = cacheService;
+    this.queueBackgroundJob = queueBackgroundJob;
   }
 
   async create({ userId, accessToken, userAgent }) {
@@ -8,6 +12,15 @@ module.exports = class SessionService {
       const sessionObject = { accessToken, userId, userAgent };
 
       await this.sessionRepository.create(sessionObject);
+
+      const sessions = await this.sessionRepository.findSessions(userId);
+
+      this.queueBackgroundJob({
+        name: jobType.cacheSession.name,
+        meta: { userId, userSessions: sessions },
+        className: this.cacheService,
+        functionName: this.cacheService.setSession,
+      });
 
       return true;
     } catch (error) {
@@ -31,6 +44,15 @@ module.exports = class SessionService {
     try {
       await this.sessionRepository.deleteSession(userId, userAgent);
 
+      const sessions = await this.sessionRepository.findSessions(userId);
+
+      this.queueBackgroundJob({
+        name: jobType.cacheSession.name,
+        meta: { userId, userSessions: sessions },
+        className: this.cacheService,
+        functionName: this.cacheService.setSession,
+      });
+
       return true;
     } catch (error) {
       error.meta = { ...error.meta, 'SessionService.remove': { userId, userAgent } };
@@ -40,7 +62,15 @@ module.exports = class SessionService {
 
   async removeExpiredSessions() {
     try {
-      const sessions = await this.sessionRepository.deleteExpiredSessions();
+      await this.sessionRepository.deleteExpiredSessions();
+
+      const sessions = await this.sessionRepository.findAllSessions();
+      this.queueBackgroundJob({
+        name: jobType.cacheSessions.name,
+        meta: { allSessions: sessions },
+        className: this.cacheService,
+        functionName: this.cacheService.setSessions,
+      });
 
       return sessions;
     } catch (error) {
@@ -50,7 +80,7 @@ module.exports = class SessionService {
 
   async fetchSessions(userId) {
     try {
-      const sessions = await this.sessionRepository.findSessions(userId);
+      const sessions = await this.cacheService.getSession(userId);
 
       return sessions;
     } catch (error) {

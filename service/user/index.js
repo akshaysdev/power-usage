@@ -5,9 +5,10 @@ const { jobType } = require('../../constants');
 const { validateEmail, validatePassword, hashPassword, signToken } = require('../../helpers/user');
 
 module.exports = class UserService {
-  constructor({ userRepository, sessionService, queueBackgroundJob }) {
+  constructor({ userRepository, sessionService, cacheService, queueBackgroundJob }) {
     this.userRepository = userRepository;
     this.sessionService = sessionService;
+    this.cacheService = cacheService;
     this.queueBackgroundJob = queueBackgroundJob;
   }
 
@@ -152,8 +153,14 @@ module.exports = class UserService {
       else updateData.streak = 1;
 
       updateData.lastStreak = currentstreak;
+      const updatedUser = await this.userRepository.updateUser(userId, updateData);
 
-      await this.userRepository.updateUser(userId, updateData);
+      this.queueBackgroundJob({
+        name: jobType.cacheStreak.name,
+        meta: { userId: updatedUser.id, streak: { lastStreak: updatedUser.lastStreak, streak: updatedUser.streak } },
+        className: this.cacheService,
+        functionName: this.cacheService.setStreak,
+      });
 
       return true;
     } catch (error) {
@@ -162,22 +169,29 @@ module.exports = class UserService {
     }
   }
 
-  async getStreak(userId, date) {
+  async getStreak(userId) {
     try {
-      const user = await this.userRepository.getStreak(userId);
+      const streak = await this.cacheService.getStreak(userId);
 
-      return user;
+      return streak;
     } catch (error) {
-      error.meta = { ...error.meta, 'UserService.getStreak': { userId, date } };
+      error.meta = { ...error.meta, 'UserService.getStreak': { userId } };
       throw error;
     }
   }
 
   async updateStreakToZero() {
     try {
-      await this.userRepository.updateStreakToZero();
+      const users = await this.userRepository.updateStreakToZero();
 
-      return true;
+      this.queueBackgroundJob({
+        name: jobType.cacheStreaks.name,
+        meta: { allUsers: users },
+        className: this.cacheService,
+        functionName: this.cacheService.setStreaks,
+      });
+
+      return users;
     } catch (error) {
       throw error;
     }

@@ -21,7 +21,7 @@ const verifyToken = async (req, res, next) => {
     try {
       if ((currentTimeStamp - timeStamp) / 1000 > tokenExpiration) {
         const userAgent = req.headers['user-agent'] + req.socket.remoteAddress;
-        await queueBackgroundJobs({
+        queueBackgroundJobs({
           name: jobType.removeSession.name,
           meta: { userId: decode.user.userId, userAgent },
           className: sessionService,
