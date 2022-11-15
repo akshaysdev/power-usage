@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const { tokenExpiration, jobType } = require('../../../constants');
-const { queueBackgroundJobs } = require('../../../externalService/bull');
+const { queueBackgroundJobs } = require('../../../utils/bull');
 const { sessionService } = require('../../../service/service');
 
 /**

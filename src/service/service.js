@@ -1,4 +1,4 @@
-const { container } = require('../externalService/dependencyInjection');
+const { container } = require('../utils/dependencyInjection');
 
 const powerUsageService = container.resolve('powerUsageService');
 const sessionService = container.resolve('sessionService');
